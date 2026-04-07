@@ -14,6 +14,7 @@ Base URL: /api/master-transact-pelatihan
 - [Create Pelatihan](#create-pelatihan)
 - [Get Semua Pelatihan](#get-semua-pelatihan)
 - [Search Pelatihan](#search-pelatihan)
+- [Grafik Penilaian](#grafik-penilaian)
 - [Get Pelatihan by ID](#get-pelatihan-by-id)
 - [Update Pelatihan](#update-pelatihan)
 - [Delete Pelatihan](#delete-pelatihan)
@@ -132,6 +133,50 @@ Response Error (400)
 {
   "success": false,
   "message": "keyword wajib diisi"
+}
+```
+
+---
+<a id="grafik-penilaian"></a>
+
+## Grafik Penilaian
+
+Ambil data agregasi nilai untuk kebutuhan grafik berdasarkan `id_transact`.
+
+**POST**
+```
+/api/master-transact-pelatihan/grafik
+```
+
+Catatan: endpoint ini diproteksi auth (butuh token seperti endpoint master-transact-pelatihan lainnya).
+
+**Body**
+```json
+{
+  "id_transact": 16
+}
+```
+
+```json
+Response Sukses (200)
+{
+  "success": true,
+  "data": {
+    "global_1_5": [],
+    "tenaga_6_23": [],
+    "global_24_42": []
+  }
+}
+```
+
+```json
+Response Error (400)
+{
+  "success": false,
+  "message": "Validasi gagal",
+  "error": [
+    "\"id_transact\" must be a positive number"
+  ]
 }
 ```
 
