@@ -19,6 +19,9 @@ router.get("/", masterTransactPelatihanController.findAll);
 // SEARCH (by nama_pelatihan)
 router.post("/search", validate(masterTransactPelatihanSchemas.search), masterTransactPelatihanController.search);
 
+// GRAFIK PENILAIAN (by id_transact)
+router.post("/grafik", validate(masterTransactPelatihanSchemas.grafik), masterTransactPelatihanController.grafik);
+
 // READ BY ID
 router.get("/:id", masterTransactPelatihanController.findById);
 

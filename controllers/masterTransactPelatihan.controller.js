@@ -302,3 +302,36 @@ exports.search = async (req, res) => {
     });
   }
 };
+
+// Grafik penilaian per pelatihan (id_transact)
+exports.grafik = async (req, res) => {
+  try {
+    const { id_transact } = req.body;
+
+    const row = await MasterTransactPelatihan.grafikPenilaian(id_transact);
+    const raw = row ? row.review_json : null;
+
+    let data = raw;
+    if (typeof raw === "string") {
+      try {
+        data = JSON.parse(raw);
+      } catch (_) {
+        // leave as string if somehow not JSON
+      }
+    }
+
+    res.json({
+      success: true,
+      data: data || {
+        global_1_5: [],
+        tenaga_6_23: [],
+        global_24_42: []
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
