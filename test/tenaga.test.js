@@ -1,12 +1,15 @@
 const request = require("supertest");
 const app = require("../app");
+const getTestToken = require("./helpers/token");
 
 const testNI = "NI-TEST-001";
+const token = getTestToken();
 
 describe("TENAGA API", () => {
   it("POST /api/tenaga - create data", async () => {
     const res = await request(app)
       .post("/api/tenaga")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         NI: testNI,
         Nama: "Tenaga Testing",
@@ -21,7 +24,9 @@ describe("TENAGA API", () => {
   });
 
   it("GET /api/tenaga - get all data", async () => {
-    const res = await request(app).get("/api/tenaga");
+    const res = await request(app)
+      .get("/api/tenaga")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -31,6 +36,7 @@ describe("TENAGA API", () => {
   it("POST /api/tenaga/search - search by keyword", async () => {
     const res = await request(app)
       .post("/api/tenaga/search")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         keyword: "Testing",
       });
@@ -41,7 +47,9 @@ describe("TENAGA API", () => {
   });
 
   it("GET /api/tenaga/:ni - get by NI", async () => {
-    const res = await request(app).get(`/api/tenaga/${testNI}`);
+    const res = await request(app)
+      .get(`/api/tenaga/${testNI}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -51,6 +59,7 @@ describe("TENAGA API", () => {
   it("PUT /api/tenaga/:ni - update data", async () => {
     const res = await request(app)
       .put(`/api/tenaga/${testNI}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         Nama: "Tenaga Updated",
         Kelas: "XI",
@@ -63,7 +72,9 @@ describe("TENAGA API", () => {
   });
 
   it("DELETE /api/tenaga/:ni - delete data", async () => {
-    const res = await request(app).delete(`/api/tenaga/${testNI}`);
+    const res = await request(app)
+      .delete(`/api/tenaga/${testNI}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

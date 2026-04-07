@@ -1,20 +1,16 @@
 const db = require("../config/db");
 
-
-
 const MasterTransactPelatihan = {
   create: async (data) => {
     const [result] = await db.query(
       `INSERT INTO tb_master_transact_pelatihan
-       (nama_pelatihan, start_date, end_date, komentar, id_tenaga, id_si)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       (nama_pelatihan, start_date, end_date, g_tenaga)
+       VALUES (?, ?, ?, ?)`,
       [
         data.nama_pelatihan,
         data.start_date,
         data.end_date,
-        data.komentar || null,
-        data.id_tenaga,
-        data.id_si,
+        data.g_tenaga || null
       ]
     );
     return result;
@@ -45,17 +41,13 @@ const MasterTransactPelatihan = {
        SET nama_pelatihan = ?,
            start_date = ?,
            end_date = ?,
-           komentar = ?,
-           id_tenaga = ?,
-           id_si = ?
+           g_tenaga = ?
        WHERE id = ?`,
       [
         data.nama_pelatihan,
         data.start_date,
         data.end_date,
-        data.komentar || null,
-        data.id_tenaga,
-        data.id_si,
+        data.g_tenaga || null,
         id,
       ]
     );

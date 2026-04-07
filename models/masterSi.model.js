@@ -13,9 +13,10 @@ const MasterSi = {
   findAll: async (limit, offset) => {
     const sql = `
       SELECT * FROM tb_master_si
-      LIMIT ? OFFSET ?
     `;
-    const [rows] = await db.execute(sql, [limit, offset]);
+    
+    // const [rows] = await db.execute(sql, [limit, offset]);
+    const [rows] = await db.execute(sql);
     return rows;
   },
 

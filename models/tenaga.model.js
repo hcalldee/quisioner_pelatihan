@@ -37,9 +37,9 @@ const Tenaga = {
     const placeholders = niList.map(() => '?').join(',');
 
     const [rows] = await db.query(
-      `SELECT NI, Nama 
-      FROM tb_tenaga 
-      WHERE NI IN (${placeholders})`,
+      `SELECT NI, Nama, Status
+       FROM tb_tenaga
+       WHERE NI IN (${placeholders})`,
       niList
     );
 

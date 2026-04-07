@@ -1,8 +1,10 @@
 const request = require("supertest");
 const app = require("../app");
+const getTestToken = require("./helpers/token");
 
 describe("API Pertanyaan", () => {
   let createdId;
+  const token = getTestToken();
 
   /**
    * CREATE
@@ -10,6 +12,7 @@ describe("API Pertanyaan", () => {
   it("POST /api/pertanyaan - create pertanyaan", async () => {
     const res = await request(app)
       .post("/api/pertanyaan")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         question: "Apa itu Node.js?",
         id_sub_kategori: 1,
@@ -26,7 +29,9 @@ describe("API Pertanyaan", () => {
    * GET ALL
    */
   it("GET /api/pertanyaan - get semua pertanyaan", async () => {
-    const res = await request(app).get("/api/pertanyaan");
+    const res = await request(app)
+      .get("/api/pertanyaan")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -39,6 +44,7 @@ describe("API Pertanyaan", () => {
   it("POST /api/pertanyaan/search - search pertanyaan", async () => {
     const res = await request(app)
       .post("/api/pertanyaan/search")
+      .set("Authorization", `Bearer ${token}`)
       .send({ keyword: "Node" });
 
     expect(res.statusCode).toBe(200);
@@ -50,7 +56,9 @@ describe("API Pertanyaan", () => {
    * GET BY ID
    */
   it("GET /api/pertanyaan/:id - get pertanyaan by id", async () => {
-    const res = await request(app).get(`/api/pertanyaan/${createdId}`);
+    const res = await request(app)
+      .get(`/api/pertanyaan/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -63,6 +71,7 @@ describe("API Pertanyaan", () => {
   it("PUT /api/pertanyaan/:id - update pertanyaan", async () => {
     const res = await request(app)
       .put(`/api/pertanyaan/${createdId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         question: "Apa itu Node.js dan kegunaannya?",
         id_sub_kategori: 1,
@@ -76,9 +85,9 @@ describe("API Pertanyaan", () => {
    * DELETE
    */
   it("DELETE /api/pertanyaan/:id - delete pertanyaan", async () => {
-    const res = await request(app).delete(
-      `/api/pertanyaan/${createdId}`
-    );
+    const res = await request(app)
+      .delete(`/api/pertanyaan/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

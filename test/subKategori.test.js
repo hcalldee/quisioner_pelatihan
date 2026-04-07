@@ -1,12 +1,15 @@
 const request = require("supertest");
 const app = require("../app");
+const getTestToken = require("./helpers/token");
 
 let createdId;
+const token = getTestToken();
 
 describe("SUB KATEGORI API", () => {
   it("POST /api/sub-kategori - create data", async () => {
     const res = await request(app)
       .post("/api/sub-kategori")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         nama: "Sub Kategori Testing",
         master_kategori: 1,
@@ -20,7 +23,9 @@ describe("SUB KATEGORI API", () => {
   });
 
   it("GET /api/sub-kategori - get all data", async () => {
-    const res = await request(app).get("/api/sub-kategori");
+    const res = await request(app)
+      .get("/api/sub-kategori")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -30,6 +35,7 @@ describe("SUB KATEGORI API", () => {
   it("POST /api/sub-kategori/search - search by keyword", async () => {
     const res = await request(app)
       .post("/api/sub-kategori/search")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         keyword: "Testing",
       });
@@ -40,7 +46,9 @@ describe("SUB KATEGORI API", () => {
   });
 
   it("GET /api/sub-kategori/:id - get by id", async () => {
-    const res = await request(app).get(`/api/sub-kategori/${createdId}`);
+    const res = await request(app)
+      .get(`/api/sub-kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -50,6 +58,7 @@ describe("SUB KATEGORI API", () => {
   it("PUT /api/sub-kategori/:id - update data", async () => {
     const res = await request(app)
       .put(`/api/sub-kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         nama: "Sub Kategori Updated",
         master_kategori: 2,
@@ -60,9 +69,9 @@ describe("SUB KATEGORI API", () => {
   });
 
   it("DELETE /api/sub-kategori/:id - delete data", async () => {
-    const res = await request(app).delete(
-      `/api/sub-kategori/${createdId}`
-    );
+    const res = await request(app)
+      .delete(`/api/sub-kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

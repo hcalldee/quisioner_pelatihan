@@ -1,8 +1,10 @@
 const request = require("supertest");
 const app = require("../app"); // pastikan export app, BUKAN app.listen
 const db = require("../config/db");
+const getTestToken = require("./helpers/token");
 
 let createdId;
+const token = getTestToken();
 
 afterAll(async () => {
   await db.end(); // tutup koneksi DB setelah test
@@ -16,6 +18,7 @@ describe("MASTER SI API", () => {
   it("POST /api/master-si - create data", async () => {
     const res = await request(app)
       .post("/api/master-si")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         nama_media: "Testing Media Jest"
       });
@@ -32,7 +35,8 @@ describe("MASTER SI API", () => {
    */
   it("GET /api/master-si - get list", async () => {
     const res = await request(app)
-      .get("/api/master-si?page=1&limit=10");
+      .get("/api/master-si?page=1&limit=10")
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -45,6 +49,7 @@ describe("MASTER SI API", () => {
   it("POST /api/master-si/search - search by keyword", async () => {
     const res = await request(app)
       .post("/api/master-si/search")
+      .set("Authorization", `Bearer ${token}`)
       .send({
         keyword: "Testing",
         page: 1,
@@ -61,7 +66,8 @@ describe("MASTER SI API", () => {
    */
   it("GET /api/master-si/:id - get detail", async () => {
     const res = await request(app)
-      .get(`/api/master-si/${createdId}`);
+      .get(`/api/master-si/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -74,6 +80,7 @@ describe("MASTER SI API", () => {
   it("PUT /api/master-si/:id - update data", async () => {
     const res = await request(app)
       .put(`/api/master-si/${createdId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         nama_media: "Updated Media Jest"
       });
@@ -87,7 +94,8 @@ describe("MASTER SI API", () => {
    */
   it("DELETE /api/master-si/:id - delete data", async () => {
     const res = await request(app)
-      .delete(`/api/master-si/${createdId}`);
+      .delete(`/api/master-si/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

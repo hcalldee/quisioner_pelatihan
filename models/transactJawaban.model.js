@@ -17,6 +17,29 @@ exports.create = (data) => {
   ]);
 };
 
+exports.createKomentar = async (data) => {
+  const sql = `INSERT INTO tb_komentar (id_si, id_transact, komentar) VALUES (?, ?, ?)`;
+  const [result] = await db.execute(sql, [data.id_si, data.id_transact, data.komentar]);
+  return result.insertId;
+};
+
+exports.bulkCreateJawaban = (data) => {
+  const sql = `
+    INSERT INTO tb_transact_jawaban
+    (id_komentar, id_pertanyaan, jawaban, tng_spec)
+    VALUES ?
+  `;
+
+  const values = data.map((item) => [
+    item.id_komentar,
+    item.id_pertanyaan,
+    item.jawaban,
+    item.tng_spec ?? ""
+  ]);
+
+  return db.query(sql, [values]);
+};
+
 /**
  * READ ALL (by transaksi)
  * biasanya jawaban ditarik berdasarkan id_transact

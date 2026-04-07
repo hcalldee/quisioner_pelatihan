@@ -5,15 +5,20 @@ const {
   parseGTenaga
 } = require('../utilities/function');
 
+function toISODateOnly(d) {
+  if (!d) return null;
+  const dt = d instanceof Date ? d : new Date(d);
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toISOString().slice(0, 10);
+}
+
 exports.create = async (req, res) => {
   try {
     const {
       nama_pelatihan,
       start_date,
       end_date,
-      komentar,
-      id_tenaga,
-      id_si,
+      g_tenaga
     } = req.body;
 
     if (!nama_pelatihan) {
@@ -23,13 +28,40 @@ exports.create = async (req, res) => {
       });
     }
 
+    if (!start_date || !end_date) {
+      return res.status(400).json({
+        success: false,
+        message: "start_date dan end_date wajib diisi",
+      });
+    }
+
+    const sd = new Date(start_date);
+    const ed = new Date(end_date);
+    if (Number.isNaN(sd.getTime()) || Number.isNaN(ed.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "format start_date/end_date tidak valid",
+      });
+    }
+    if (ed < sd) {
+      return res.status(400).json({
+        success: false,
+        message: "end_date tidak boleh lebih kecil dari start_date",
+      });
+    }
+
+    if (!g_tenaga || !parseGTenaga(g_tenaga).length) {
+      return res.status(400).json({
+        success: false,
+        message: "g_tenaga wajib diisi (minimal 1 instruktur)",
+      });
+    }
+
     const result = await MasterTransactPelatihan.create({
       nama_pelatihan,
       start_date,
       end_date,
-      komentar,
-      id_tenaga,
-      id_si,
+      g_tenaga
     });
 
     res.status(201).json({
@@ -39,9 +71,7 @@ exports.create = async (req, res) => {
         nama_pelatihan,
         start_date,
         end_date,
-        komentar,
-        id_tenaga,
-        id_si,
+        g_tenaga
       },
     });
   } catch (error) {
@@ -65,27 +95,34 @@ exports.findAll = async (req, res) => {
       )
     ];
 
-    // 👇 INI DIA TEMPATNYA
+    // ðŸ‘‡ INI DIA TEMPATNYA
     const tenagaRows = await TenagaModel.findByNIList(allNI);
 
-    // mapping NI → Nama
+    // mapping NI -> { nama, status } dari tb_tenaga
     const tenagaMap = {};
-    tenagaRows.forEach(t => {
-      tenagaMap[t.NI] = t.Nama;
+    tenagaRows.forEach((t) => {
+      tenagaMap[t.NI] = {
+        nama: t.Nama,
+        status: t.Status != null ? String(t.Status) : "0",
+      };
     });
-
+    
     // inject ke response
     const parsedData = data.map(item => {
-     // ubah g_tenaga jadi array objek dengan status & nama
-      const gTenagaObj = parseGTenaga(item.g_tenaga).map((ni, idx) => ({
-        // status: idx === 0 ? "1" : "0", // contoh: first index = 1, sisanya 0
-        status: idx.toString(),
-        nama: tenagaMap[ni] || ni,
-        ni:ni
-      }));
+     // ubah g_tenaga jadi array objek dengan status & nama (status dari tb_tenaga.Status)
+      const gTenagaObj = parseGTenaga(item.g_tenaga).map((ni) => {
+        const meta = tenagaMap[ni] || {};
+        return {
+          status: meta.status != null ? String(meta.status) : "0",
+          nama: meta.nama || ni,
+          ni: ni
+        };
+      });
 
       return {
         ...item,
+        start_date_raw: toISODateOnly(item.start_date),
+        end_date_raw: toISODateOnly(item.end_date),
         start_date: formatDateWithDayID(item.start_date),
         end_date: formatDateWithDayID(item.end_date),
         g_tenaga: gTenagaObj
@@ -123,22 +160,30 @@ exports.findById = async (req, res) => {
     // ambil data tenaga
     const tenagaRows = await TenagaModel.findByNIList(niList);
 
-    // bikin map NI -> Nama
+    // bikin map NI -> { nama, status }
     const tenagaMap = {};
-    tenagaRows.forEach(t => {
-      tenagaMap[t.NI] = t.Nama;
+    tenagaRows.forEach((t) => {
+      tenagaMap[t.NI] = {
+        nama: t.Nama,
+        status: t.Status != null ? String(t.Status) : "0",
+      };
     });
 
     // inject ke response (TANPA map)
     const parsedData = {
       ...data,
+      start_date_raw: toISODateOnly(data.start_date),
+      end_date_raw: toISODateOnly(data.end_date),
       start_date: formatDateWithDayID(data.start_date),
       end_date: formatDateWithDayID(data.end_date),
-      g_tenaga: parseGTenaga(data.g_tenaga).map((ni, idx) => ({
-        status: idx.toString(),
-        nama: tenagaMap[ni] || ni,
-        ni: ni
-      }))
+      g_tenaga: parseGTenaga(data.g_tenaga).map((ni) => {
+        const meta = tenagaMap[ni] || {};
+        return {
+          status: meta.status != null ? String(meta.status) : "0",
+          nama: meta.nama || ni,
+          ni: ni
+        };
+      })
     };
 
     res.json({
@@ -160,18 +205,32 @@ exports.update = async (req, res) => {
       nama_pelatihan,
       start_date,
       end_date,
-      komentar,
-      id_tenaga,
-      id_si,
+      g_tenaga
     } = req.body;
+
+    if (start_date && end_date) {
+      const sd = new Date(start_date);
+      const ed = new Date(end_date);
+      if (!Number.isNaN(sd.getTime()) && !Number.isNaN(ed.getTime()) && ed < sd) {
+        return res.status(400).json({
+          success: false,
+          message: "end_date tidak boleh lebih kecil dari start_date",
+        });
+      }
+    }
+
+    if (g_tenaga && !parseGTenaga(g_tenaga).length) {
+      return res.status(400).json({
+        success: false,
+        message: "g_tenaga tidak valid",
+      });
+    }
 
     const result = await MasterTransactPelatihan.update(req.params.id, {
       nama_pelatihan,
       start_date,
       end_date,
-      komentar,
-      id_tenaga,
-      id_si,
+      g_tenaga
     });
 
     if (result.affectedRows === 0) {
@@ -228,11 +287,14 @@ exports.search = async (req, res) => {
     }
 
     const data = await MasterTransactPelatihan.search(keyword);
+    const parsedData = (data || []).map((item) => ({
+      ...item,
+      start_date: formatDateWithDayID(item.start_date),
+      end_date: formatDateWithDayID(item.end_date),
+      g_tenaga: parseGTenaga(item.g_tenaga)
+    }));
 
-    res.json({
-      success: true,
-      data,
-    });
+    res.json({ success: true, data: parsedData });
   } catch (error) {
     res.status(500).json({
       success: false,

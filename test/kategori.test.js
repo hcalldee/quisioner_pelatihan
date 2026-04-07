@@ -1,8 +1,10 @@
 const request = require('supertest');
 const app = require('../app');
 const db = require('../config/db');
+const getTestToken = require("./helpers/token");
 
 let createdId;
+const token = getTestToken();
 
 afterAll(async () => {
   // optional: hapus data test
@@ -15,7 +17,9 @@ afterAll(async () => {
 describe('CRUD API KATEGORI', () => {
 
   test('GET /api/kategori - ambil semua kategori', async () => {
-    const res = await request(app).get('/api/kategori');
+    const res = await request(app)
+      .get('/api/kategori')
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -25,6 +29,7 @@ describe('CRUD API KATEGORI', () => {
   test('POST /api/kategori - tambah kategori', async () => {
     const res = await request(app)
       .post('/api/kategori')
+      .set("Authorization", `Bearer ${token}`)
       .send({
         name: 'Kategori Test Jest',
         tipe: '0'
@@ -39,7 +44,8 @@ describe('CRUD API KATEGORI', () => {
 
   test('GET /api/kategori/:id - ambil kategori by id', async () => {
     const res = await request(app)
-      .get(`/api/kategori/${createdId}`);
+      .get(`/api/kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.id).toBe(createdId);
@@ -48,6 +54,7 @@ describe('CRUD API KATEGORI', () => {
   test('PUT /api/kategori/:id - update kategori', async () => {
     const res = await request(app)
       .put(`/api/kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         name: 'Kategori Test Updated',
         tipe: '1'
@@ -59,7 +66,8 @@ describe('CRUD API KATEGORI', () => {
 
   test('DELETE /api/kategori/:id - hapus kategori', async () => {
     const res = await request(app)
-      .delete(`/api/kategori/${createdId}`);
+      .delete(`/api/kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -67,7 +75,8 @@ describe('CRUD API KATEGORI', () => {
 
   test('GET /api/kategori/:id - data tidak ditemukan', async () => {
     const res = await request(app)
-      .get(`/api/kategori/${createdId}`);
+      .get(`/api/kategori/${createdId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(404);
   });
