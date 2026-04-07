@@ -1,4 +1,4 @@
-﻿const Joi = require("joi");
+const Joi = require("joi");
 const { safeString, safeTextWithBr } = require("./schemas");
 
 const idInt = () => Joi.number().integer().positive();
@@ -45,7 +45,10 @@ const masterTransactPelatihanSchemas = {
     end_date: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
     g_tenaga: safeString().trim().min(3).max(4000).optional()
   }).min(1),
-  search: keywordSchema
+  search: keywordSchema,
+  grafik: Joi.object({
+    id_transact: idInt().required()
+  })
 };
 
 const masterSiSchemas = {
